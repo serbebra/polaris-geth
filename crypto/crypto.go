@@ -36,10 +36,7 @@ import (
 )
 
 // SignatureLength indicates the byte length required to carry a signature with recovery id.
-const SignatureLength = 64 + 1 // 64 bytes ECDSA signature + 1 byte recovery id
-
-// RecoveryIDOffset points to the byte offset within the signature that contains the recovery id.
-const RecoveryIDOffset = 64
+const SignatureLength = 65 // 65 bytes ECDSA signature (64 bytes R and S components + 1 byte recovery id)
 
 // DigestLength sets the signature digest exact length
 const DigestLength = 32
@@ -182,10 +179,8 @@ func FromECDSAPub(pub *ecdsa.PublicKey) []byte {
 // HexToECDSA parses a secp256k1 private key.
 func HexToECDSA(hexkey string) (*ecdsa.PrivateKey, error) {
 	b, err := hex.DecodeString(hexkey)
-	if byteErr, ok := err.(hex.InvalidByteError); ok {
-		return nil, fmt.Errorf("invalid hex character %q in private key", byte(byteErr))
-	} else if err != nil {
-		return nil, errors.New("invalid hex data for private key")
+	if err != nil {
+		return nil, err
 	}
 	return ToECDSA(b)
 }
